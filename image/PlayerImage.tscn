@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dameq2j07lss0"]
+
+[ext_resource type="Script" path="res://image/image.gd" id="1_32vsd"]
+[ext_resource type="Texture2D" uid="uid://dtefeq7vj6ec7" path="res://icon.svg" id="2_etlse"]
+
+[node name="PlayerImage" type="TextureRect"]
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_default_cursor_shape = 13
+texture = ExtResource("2_etlse")
+expand_mode = 1
+script = ExtResource("1_32vsd")
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]

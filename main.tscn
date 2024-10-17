@@ -1,0 +1,82 @@
+[gd_scene load_steps=4 format=3 uid="uid://b5kcwipvoib4"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_4kpiv"]
+[ext_resource type="Script" path="res://player/player.gd" id="2_so40g"]
+[ext_resource type="Script" path="res://player/player_holder.gd" id="2_wroqk"]
+
+[node name="main" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4kpiv")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 42.865)
+layout_mode = 2
+color = Color(0.371877, 0.61879, 0.572072, 1)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(98.98, 0)
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.961862, 0.577685, 0.749513, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.945532, 0.958783, 0.750782, 1)
+
+[node name="ColorRect3" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 3
+color = Color(0.55547, 0.8397, 0.952472, 1)
+
+[node name="player_holder" type="Control" parent="HBoxContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_force_pass_scroll_events = false
+script = ExtResource("2_wroqk")
+
+[node name="player" type="ColorRect" parent="HBoxContainer/player_holder"]
+layout_mode = 0
+offset_left = 215.0
+offset_top = 50.0
+offset_right = 695.0
+offset_bottom = 410.0
+scale = Vector2(1.545, 1.545)
+size_flags_horizontal = 3
+mouse_filter = 1
+color = Color(1, 1, 1, 0.184314)
+script = ExtResource("2_so40g")
+
+[node name="children" type="Control" parent="HBoxContainer/player_holder/player"]
+layout_mode = 2
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="selection" type="ColorRect" parent="HBoxContainer/player_holder/player"]
+visible = false
+z_index = 4096
+layout_mode = 2
+offset_left = 162.0
+offset_top = 71.0
+offset_right = 288.0
+offset_bottom = 185.0
+mouse_filter = 2
+color = Color(0.513726, 0.827451, 0.992157, 0.254902)
+
+[connection signal="gui_input" from="HBoxContainer/player_holder" to="HBoxContainer/player_holder" method="_on_gui_input"]
+[connection signal="gui_input" from="HBoxContainer/player_holder/player" to="HBoxContainer/player_holder/player" method="_on_gui_input"]
