@@ -3,12 +3,14 @@
 [ext_resource type="Script" path="res://image/image.gd" id="1_32vsd"]
 [ext_resource type="Texture2D" uid="uid://dtefeq7vj6ec7" path="res://icon.svg" id="2_etlse"]
 
-[node name="PlayerImage" type="TextureRect"]
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_32vsd")
+
+[node name="Image" type="TextureRect" parent="."]
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_default_cursor_shape = 13
 texture = ExtResource("2_etlse")
 expand_mode = 1
-script = ExtResource("1_32vsd")
 
-[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="gui_input" from="Image" to="." method="_on_image_gui_input"]

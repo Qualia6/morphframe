@@ -15,12 +15,13 @@ func place_image_files(files: PackedStringArray) -> void:
 		var place_location = get_local_mouse_position() + Vector2(i,i) * drop_offset_distance
 		add_image(place_location, image_texture)
 
+
 func add_image(location: Vector2, image: ImageTexture) -> void:
 	var instance: PlayerImage = PlayerImageScene.instantiate()
 	instance.position = location
 	instance.set_texture(image)
 	var scale_factor: float = min(300 / image.get_size().y, min(300 / image.get_size().x, 1))
-	instance.size = Vector2(scale_factor,scale_factor) * image.get_size()
+	instance.scale = Vector2(scale_factor,scale_factor)
 	instance.clicked.connect(get_parent()._on_object_clicked.bind(instance))
 	$children.add_child(instance)
 	print("added image :3")
@@ -47,7 +48,9 @@ func select_single(object: PlayerImage) -> bool:
 		deselect_everything_but_specific(object)
 	var should_drag: bool = selection_changing_logic(object, get_selection_mode())
 	
-	if should_drag: $selection.first_point = get_local_mouse_position()
+	update_selection_box()
+	
+	if should_drag: $selector.first_point = get_local_mouse_position()
 	return should_drag
 
 
@@ -93,27 +96,66 @@ func deselect_everything() -> void:
 
 
 func start_selecting() -> void:
-	$selection.visible = true
-	$selection.first_point = get_local_mouse_position()
+	$selector.visible = true
+	$selector.first_point = get_local_mouse_position()
 
 
 func stop_selecting() -> void:
-	$selection.visible = false
-	$selection.second_point = get_local_mouse_position()
+	$selector.visible = false
 	
 	if get_selection_mode() == SelectionMode.NORMAL:
 		deselect_everything()
 	
 	var selection_mode: SelectionMode = get_selection_mode()
 	
-	print("a")
 	for object: PlayerImage in $children.get_children():
-		print("b")
-		if Utils.is_in_bounds(object.position + object.size / 2, $selection.min, $selection.max):
-			print("c")
+		if Utils.is_in_bounds(object.get_center(), $selector.min, $selector.max):
 			selection_changing_logic(object, selection_mode)
+	
+	update_selection_box()
+
+
+func update_selection_box():
+	if selection == []:
+		$selection_box.visible = false
+		return
+	$selection_box.visible = true
+	var box: Rect2 = Rect2(0,0,0,0)
+	for object: PlayerImage in selection:
+		var bounding_rect: Rect2 = object.get_bounding_rect()
+		if box == Rect2(0,0,0,0):
+			box = bounding_rect
+		else:
+			box = box.merge(bounding_rect)
+	
+	$selection_box.position = box.position
+	$selection_box.size = box.size
 
 
 func move_selection(amount: Vector2) -> void:
-	for object in selection:
+	for object: PlayerImage in selection:
 		object.move_by(amount)
+	update_selection_box()
+
+
+func start_transform_selection() -> void:
+	for object: PlayerImage in selection:
+		object.set_previous()
+
+
+func resize_selection(orgin: Vector2, change: Vector2) -> void:
+	for object: PlayerImage in selection:
+		object.resize(orgin, change)
+	update_selection_box()
+
+
+func rotate_selection(orgin: Vector2, angle: float) -> void:
+	for object: PlayerImage in selection:
+		object.do_rotation(orgin, angle)
+	update_selection_box()
+
+
+func shear_selection(orgin: Vector2, amount: float) -> void:
+	for object: PlayerImage in selection:
+		object.do_shear(orgin, amount)
+	update_selection_box()
