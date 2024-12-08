@@ -16,3 +16,7 @@ const fine_discrete_rotate_angle: float = PI/24
 const required_drag_distance_to_start_drag: float = 10
 
 const mouse_border_warpping: bool = true
+
+const max_undo: int = 200
+
+const selecting_undo: bool = true

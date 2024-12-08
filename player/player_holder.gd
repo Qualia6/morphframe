@@ -4,6 +4,7 @@ class_name PlayerHolder
 # Responsibilities:
 #	User Input
 #	Movement of the editor
+#	Undo
 
 
 var previous_player_position: Vector2
@@ -16,7 +17,6 @@ var starting_mouse_position: Vector2
 
 var previous_mouse_editor_position: Vector2
 var accumulated_editor_drag: Vector2 = Vector2(0,0)
-var starting_mouse_editor_position: Vector2
 
 enum MouseAction {NONE, DRAGGING, SELECTING, POTENTIAL_DRAG, RESIZE}
 var mouse_action = MouseAction.NONE
@@ -29,37 +29,22 @@ var handle_transform_orgin: Vector2
 
 func _on_object_clicked(object: PlayerImage) -> void:
 	if mouse_action == MouseAction.NONE:
+		var previous_selection: Array[PlayerImage] = $player.selection.duplicate()
 		var should_drag: bool = $player.select_single(object)
+		var action: Actions.SelectionAction = Actions.SelectionAction.new($player, $player.selection)
+		action.previous_selection = previous_selection
+		apply_action(action, true)
 		if should_drag: 
 			mouse_action = MouseAction.POTENTIAL_DRAG
-			start_transform_selection()
+			reset_mouse_movement()
 
 
-func start_editor_drag():
-	starting_mouse_editor_position = get_local_mouse_position()
+func reset_mouse_movement():
 	previous_mouse_editor_position = get_local_mouse_position()
 	accumulated_editor_drag = Vector2(0,0)
 	starting_mouse_position = $player.get_local_mouse_position()
 	previous_mouse_position = $player.get_local_mouse_position()
 	accumulated_drag = Vector2(0,0)
-	previous_player_position = $player.position
-
-func start_selecting():
-	starting_mouse_editor_position = get_local_mouse_position()
-	previous_mouse_editor_position = get_local_mouse_position()
-	accumulated_editor_drag = Vector2(0,0)
-	starting_mouse_position = $player.get_local_mouse_position()
-	previous_mouse_position = $player.get_local_mouse_position()
-	accumulated_drag = Vector2(0,0)
-
-func start_transform_selection():
-	starting_mouse_editor_position = get_local_mouse_position()
-	previous_mouse_editor_position = get_local_mouse_position()
-	accumulated_editor_drag = Vector2(0,0)
-	starting_mouse_position = $player.get_local_mouse_position()
-	previous_mouse_position = $player.get_local_mouse_position()
-	accumulated_drag = Vector2(0,0)
-	$player.start_transform_selection()
 
 
 func get_scroll_amount() -> float:
@@ -89,18 +74,23 @@ func _on_gui_input(event: InputEvent) -> void:	# happens after objects
 			$player.position.y -= get_scroll_amount()
 	elif event.is_action("editor drag"):
 		if event.is_pressed():
-			start_editor_drag()
+			reset_mouse_movement()
+			previous_player_position = $player.position
 			middle_click_dragging = true
 			
 	elif event.is_action("primary click"): 
 		if event.is_pressed() and mouse_action == MouseAction.NONE:
 			mouse_action = MouseAction.SELECTING
-			start_selecting()
+			reset_mouse_movement()
 			$player.start_selecting()
 			get_viewport().set_input_as_handled()
 		elif event.is_released() and mouse_action == MouseAction.SELECTING:
 			mouse_action = MouseAction.NONE
+			var previous_selection: Array[PlayerImage] = $player.selection.duplicate()
 			$player.stop_selecting()
+			var action: Actions.SelectionAction = Actions.SelectionAction.new($player, $player.selection)
+			action.previous_selection = previous_selection
+			apply_action(action, true)
 			get_viewport().set_input_as_handled()
 
 
@@ -112,13 +102,13 @@ func _input(event: InputEvent) -> void: # happens before objects
 	if event.is_action_released("primary click"):
 		if mouse_action == MouseAction.DRAGGING:
 			accumulate_drag()
-			physics_drag()
+			physics_drag(true)
 			mouse_action = MouseAction.NONE
 		if mouse_action == MouseAction.POTENTIAL_DRAG:
 			mouse_action = MouseAction.NONE
 		if mouse_action == MouseAction.RESIZE:
 			accumulate_drag()
-			physics_resize()
+			physics_resize(true)
 			mouse_action = MouseAction.NONE
 
 
@@ -128,13 +118,13 @@ func _physics_process(delta: float) -> void:
 
 	match mouse_action:
 		MouseAction.DRAGGING:
-			physics_drag()
+			physics_drag(false)
 		MouseAction.SELECTING:
 			physics_select()
 		MouseAction.POTENTIAL_DRAG:
 			physics_potential_drag()
 		MouseAction.RESIZE:
-			physics_resize()
+			physics_resize(false)
 	
 	if ((mouse_action != MouseAction.NONE) or middle_click_dragging) and Utils.mouse_border_warpping:
 		potential_mouse_warp()
@@ -152,14 +142,16 @@ func accumulate_drag():
 
 func physics_potential_drag():
 	if accumulated_drag.length() > Utils.required_drag_distance_to_start_drag :
-		start_transform_selection()
+		reset_mouse_movement()
 		mouse_action = MouseAction.DRAGGING
 
 func physics_select() -> void:
 	$player/selector.second_point = $player/selector.first_point - accumulated_drag
 
-func physics_drag() -> void:
-	$player.move_selection(-accumulated_drag)
+func physics_drag(final: bool) -> void:
+	var action: Actions.MoveAction = Actions.MoveAction.new($player, -accumulated_drag, $player.selection)
+	apply_action(action, final)
+	$player.update_selection_box()
 
 
 func potential_mouse_warp() -> void:	
@@ -197,7 +189,7 @@ func zoom(amount: float) -> void:
 
 func _on_resize_gui_input(event: InputEvent, mode: ResizeMode) -> void:
 	if event.is_action_pressed("primary click") and event.is_pressed() and mouse_action == MouseAction.NONE:
-		start_transform_selection()
+		reset_mouse_movement()
 		mouse_action = MouseAction.RESIZE
 		resize_mode = mode
 		set_handle_transform_orgin()
@@ -227,7 +219,9 @@ func set_handle_transform_orgin():
 			handle_transform_orgin += $player/selection_box.size / 2
 
 
-func physics_resize():
+func physics_resize(final: bool):
+	var action = Actions._TransformAction
+	
 	if resize_mode == PlayerHolder.ResizeMode.ROTATE:
 		var angle: float = (starting_mouse_position - accumulated_drag - handle_transform_orgin).angle() + PI/2
 		
@@ -242,9 +236,12 @@ func physics_resize():
 			else:
 				angle *= Utils.discrete_rotate_angle
 		
-		$player.rotate_selection(handle_transform_orgin, angle)
+		action = Actions.RotateAction.new($player, angle, handle_transform_orgin, $player.selection)
+
 	elif resize_mode == PlayerHolder.ResizeMode.SHEAR:
-		$player.shear_selection(handle_transform_orgin, accumulated_drag.x / (starting_mouse_position.y - handle_transform_orgin.y))
+		var amount: float = accumulated_drag.x / (starting_mouse_position.y - handle_transform_orgin.y)
+		action = Actions.SkewAction.new($player, amount, handle_transform_orgin, $player.selection)
+		
 	else:
 		var change: Vector2 = Vector2(1,1) + accumulated_drag / (handle_transform_orgin - starting_mouse_position)
 		var lock_scale: bool = Input.is_action_pressed("lock scale");
@@ -271,12 +268,14 @@ func physics_resize():
 			else:
 				change *= Utils.discrete_transform_multiplier
 		
-		$player.resize_selection(handle_transform_orgin, change)
+		action = Actions.ScaleAction.new($player, change, handle_transform_orgin, $player.selection)
+	
+	apply_action(action, final)
+	$player.update_selection_box()
 
 
 var undo_deque: Deque = Deque.new()
 var redo_stack: Array = []
-const max_undo: int = 100
 var action_finished: bool = true
 
 signal update_undo_state(enabled: bool, tooltip: String)
@@ -295,20 +294,32 @@ func update_undoredo_button_state():
 		var top_state: Actions.CachedState = redo_stack.back()
 		update_redo_state.emit(true, top_state.get_name())
 
+
 func apply_action(action: Actions._Action, finished = true) -> void:
+	if !Utils.selecting_undo and action is Actions.SelectionAction: return
+	if !action.is_substantive(): return
+	
 	if !action_finished:
 		var previous_state: Actions.CachedState = undo_deque.pop_top()
 		if previous_state != null:
 			previous_state.apply(0)
 	action_finished = finished
+	
 	var state: Actions.CachedState = Actions.CachedState.new($player)
 	state.add(action)
+	
+	if !state.is_substantive(): 
+		return
+		
 	state.apply(1)
 	undo_deque.push_top(state)
+	
 	redo_stack = []
-	while undo_deque.size > max_undo:
+	
+	while undo_deque.size > Utils.max_undo:
 		undo_deque.pop_bottom()
 	update_undoredo_button_state()
+
 
 func undo() -> void:
 	var state: Actions.CachedState = undo_deque.pop_top()

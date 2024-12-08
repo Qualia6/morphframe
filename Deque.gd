@@ -1,4 +1,4 @@
-class_name Deque # extends RefCounted
+class_name Deque
 
 var array: Array
 var size: int = 0

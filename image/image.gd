@@ -38,27 +38,6 @@ func set_texture(texture: ImageTexture):
 var previous_transform: Transform2D = transform
 var previous_position: Vector2 = position
 
-func set_previous() -> void:
-	previous_position = position
-	previous_transform = transform
-
-func move_by(movement: Vector2):
-	position = movement + previous_position
-
-func resize(orgin: Vector2, change: Vector2):
-	transform = previous_transform.scaled(change)
-	position = (previous_transform.origin - orgin) * change + orgin
-
-func do_rotation(orgin: Vector2, angle: float):
-	transform = previous_transform.translated(-orgin).rotated(angle).translated(orgin)
-	
-func do_shear(orgin: Vector2, amount: float):
-	#omg this took a couple hours till i subled on the correct result
-	# why the hell is one 1 0 -a 1 and the other 1 -a 0 1? the hell i know
-	# but it finnnnnaaallllllyyy works omg
-	transform = (previous_transform * Transform2D(Vector2(1,0),Vector2(-amount,1),Vector2(0,0)))
-	# previous_position
-	position = (previous_transform.origin-orgin)* Transform2D(Vector2(1,-amount),Vector2(0,1),Vector2(0,0)) + orgin
 
 func _on_image_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("primary click") and event.is_pressed():

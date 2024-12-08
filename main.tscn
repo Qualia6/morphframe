@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://b5kcwipvoib4"]
+[gd_scene load_steps=21 format=3 uid="uid://b5kcwipvoib4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4kpiv"]
 [ext_resource type="Texture2D" uid="uid://mtd5sqk4315y" path="res://icons/layer_top.tres" id="2_at1bm"]
@@ -16,6 +16,18 @@
 [ext_resource type="Texture2D" uid="uid://b6wcdkeehighk" path="res://icons/save.tres" id="8_dqovd"]
 [ext_resource type="Script" path="res://tool_bar/redo.gd" id="8_l8bw5"]
 [ext_resource type="Texture2D" uid="uid://ce0i6bjaaxnci" path="res://icons/load.tres" id="9_0s31j"]
+
+[sub_resource type="InputEventAction" id="InputEventAction_ps3ni"]
+action = &"Undo"
+
+[sub_resource type="Shortcut" id="Shortcut_pv5sw"]
+events = [SubResource("InputEventAction_ps3ni")]
+
+[sub_resource type="InputEventAction" id="InputEventAction_87ed3"]
+action = &"Redo"
+
+[sub_resource type="Shortcut" id="Shortcut_6i5uu"]
+events = [SubResource("InputEventAction_87ed3")]
 
 [node name="main" type="VBoxContainer"]
 anchors_preset = 15
@@ -39,18 +51,21 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Save" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Save"
 disabled = true
 icon = ExtResource("8_dqovd")
 
 [node name="Load" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Load"
 disabled = true
 icon = ExtResource("9_0s31j")
 
 [node name="Divider2" type="ColorRect" parent="ColorRect/HBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(4, 0)
 layout_mode = 2
 color = Color(0.194167, 0.360515, 0.329612, 1)
@@ -59,6 +74,7 @@ color = Color(0.194167, 0.360515, 0.329612, 1)
 layout_mode = 2
 tooltip_text = "Undo"
 disabled = true
+shortcut = SubResource("Shortcut_pv5sw")
 icon = ExtResource("6_l8maj")
 script = ExtResource("6_rk3vy")
 
@@ -66,32 +82,39 @@ script = ExtResource("6_rk3vy")
 layout_mode = 2
 tooltip_text = "Redo"
 disabled = true
+shortcut = SubResource("Shortcut_6i5uu")
 icon = ExtResource("7_8ohri")
 script = ExtResource("8_l8bw5")
 
 [node name="Divider" type="ColorRect" parent="ColorRect/HBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(4, 0)
 layout_mode = 2
 color = Color(0.194167, 0.360515, 0.329612, 1)
 
 [node name="Layer Top" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Bring to Top"
+disabled = true
 icon = ExtResource("2_at1bm")
 
 [node name="Layer Up" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Bring up"
 disabled = true
 icon = ExtResource("4_4y8ud")
 
 [node name="Layer Down" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Bring down"
 disabled = true
 icon = ExtResource("5_16nb6")
 
 [node name="Layer Bottom" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+visible = false
 layout_mode = 2
 tooltip_text = "Bring to bottom"
 disabled = true
@@ -102,6 +125,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(98.98, 0)
 layout_mode = 2
 
@@ -132,10 +156,10 @@ script = ExtResource("2_wroqk")
 
 [node name="player" type="ColorRect" parent="HBoxContainer/player_holder"]
 layout_mode = 0
-offset_left = 117.0
-offset_top = 28.0
-offset_right = 597.0
-offset_bottom = 388.0
+offset_left = 92.0
+offset_top = 16.0
+offset_right = 572.0
+offset_bottom = 376.0
 scale = Vector2(1.545, 1.545)
 size_flags_horizontal = 3
 mouse_filter = 2
@@ -289,7 +313,6 @@ color = Color(1, 1, 1, 0.498039)
 
 [connection signal="pressed" from="ColorRect/HBoxContainer/Undo" to="." method="undo"]
 [connection signal="pressed" from="ColorRect/HBoxContainer/Redo" to="." method="redo"]
-[connection signal="pressed" from="ColorRect/HBoxContainer/Layer Top" to="." method="test_action"]
 [connection signal="gui_input" from="HBoxContainer/player_holder" to="HBoxContainer/player_holder" method="_on_gui_input"]
 [connection signal="update_redo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Redo" method="_on_player_holder_update_redo_state"]
 [connection signal="update_undo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Undo" method="_on_player_holder_update_undo_state"]

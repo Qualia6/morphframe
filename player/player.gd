@@ -1,6 +1,11 @@
 extends ColorRect
 class_name Player
 
+# Responsibilities:
+#	Adding images
+#	Changing what is selected
+
+
 var PlayerImageScene: PackedScene = preload("res://image/PlayerImage.tscn")
 
 var selection: Array[PlayerImage] = []
@@ -89,6 +94,13 @@ func deselect_everything_but_specific(object: PlayerImage) -> void:
 			selection.pop_at(current_index)
 
 
+func set_selection(new_selection: Array[PlayerImage]):
+	deselect_everything()
+	for selection_element: PlayerImage in new_selection:
+		selection_element.selected = true
+	selection = new_selection
+
+
 func deselect_everything() -> void:
 	for i in range(len(selection)):
 		selection[i].selected = false
@@ -130,32 +142,3 @@ func update_selection_box():
 	
 	$selection_box.position = box.position
 	$selection_box.size = box.size
-
-
-func move_selection(amount: Vector2) -> void:
-	for object: PlayerImage in selection:
-		object.move_by(amount)
-	update_selection_box()
-
-
-func start_transform_selection() -> void:
-	for object: PlayerImage in selection:
-		object.set_previous()
-
-
-func resize_selection(orgin: Vector2, change: Vector2) -> void:
-	for object: PlayerImage in selection:
-		object.resize(orgin, change)
-	update_selection_box()
-
-
-func rotate_selection(orgin: Vector2, angle: float) -> void:
-	for object: PlayerImage in selection:
-		object.do_rotation(orgin, angle)
-	update_selection_box()
-
-
-func shear_selection(orgin: Vector2, amount: float) -> void:
-	for object: PlayerImage in selection:
-		object.do_shear(orgin, amount)
-	update_selection_box()
