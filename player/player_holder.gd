@@ -1,6 +1,11 @@
 extends Control
 class_name PlayerHolder
 
+# Responsibilities:
+#	User Input
+#	Movement of the editor
+
+
 var previous_player_position: Vector2
 
 var middle_click_dragging: bool = false
@@ -19,7 +24,7 @@ var mouse_action = MouseAction.NONE
 enum ResizeMode {UP, LEFT, RIGHT, DOWN, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT, ROTATE, SHEAR}
 var resize_mode = ResizeMode.DOWN_RIGHT
 
-var resizing_orgin: Vector2
+var handle_transform_orgin: Vector2
 
 
 func _on_object_clicked(object: PlayerImage) -> void:
@@ -28,7 +33,6 @@ func _on_object_clicked(object: PlayerImage) -> void:
 		if should_drag: 
 			mouse_action = MouseAction.POTENTIAL_DRAG
 			start_transform_selection()
-			
 
 
 func start_editor_drag():
@@ -39,7 +43,7 @@ func start_editor_drag():
 	previous_mouse_position = $player.get_local_mouse_position()
 	accumulated_drag = Vector2(0,0)
 	previous_player_position = $player.position
-	
+
 func start_selecting():
 	starting_mouse_editor_position = get_local_mouse_position()
 	previous_mouse_editor_position = get_local_mouse_position()
@@ -196,36 +200,36 @@ func _on_resize_gui_input(event: InputEvent, mode: ResizeMode) -> void:
 		start_transform_selection()
 		mouse_action = MouseAction.RESIZE
 		resize_mode = mode
-		set_resizing_orgin()
+		set_handle_transform_orgin()
 		get_viewport().set_input_as_handled()
 
 
-func set_resizing_orgin():
-	resizing_orgin = $player/selection_box.position
+func set_handle_transform_orgin():
+	handle_transform_orgin = $player/selection_box.position
 	match resize_mode:
 		PlayerHolder.ResizeMode.UP_LEFT:
-			resizing_orgin += $player/selection_box.size
+			handle_transform_orgin += $player/selection_box.size
 		PlayerHolder.ResizeMode.UP_RIGHT:
-			resizing_orgin.y += $player/selection_box.size.y
+			handle_transform_orgin.y += $player/selection_box.size.y
 		PlayerHolder.ResizeMode.DOWN_LEFT:
-			resizing_orgin.x += $player/selection_box.size.x
+			handle_transform_orgin.x += $player/selection_box.size.x
 		PlayerHolder.ResizeMode.DOWN_RIGHT:
 			pass
 		PlayerHolder.ResizeMode.UP:
-			resizing_orgin += $player/selection_box.size
+			handle_transform_orgin += $player/selection_box.size
 		PlayerHolder.ResizeMode.LEFT:
 			pass
 		PlayerHolder.ResizeMode.DOWN:
 			pass
 		PlayerHolder.ResizeMode.RIGHT:
-			resizing_orgin += $player/selection_box.size
+			handle_transform_orgin += $player/selection_box.size
 		_:
-			resizing_orgin += $player/selection_box.size / 2
+			handle_transform_orgin += $player/selection_box.size / 2
 
 
 func physics_resize():
 	if resize_mode == PlayerHolder.ResizeMode.ROTATE:
-		var angle: float = (starting_mouse_position - accumulated_drag - resizing_orgin).angle() + PI/2
+		var angle: float = (starting_mouse_position - accumulated_drag - handle_transform_orgin).angle() + PI/2
 		
 		if Input.is_action_pressed("discrete transform"):
 			if Input.is_action_pressed("fine control"):
@@ -238,11 +242,11 @@ func physics_resize():
 			else:
 				angle *= Utils.discrete_rotate_angle
 		
-		$player.rotate_selection(resizing_orgin, angle)
+		$player.rotate_selection(handle_transform_orgin, angle)
 	elif resize_mode == PlayerHolder.ResizeMode.SHEAR:
-		$player.shear_selection(resizing_orgin, accumulated_drag.x / (starting_mouse_position.y - resizing_orgin.y))
+		$player.shear_selection(handle_transform_orgin, accumulated_drag.x / (starting_mouse_position.y - handle_transform_orgin.y))
 	else:
-		var change: Vector2 = Vector2(1,1) + accumulated_drag / (resizing_orgin - starting_mouse_position)
+		var change: Vector2 = Vector2(1,1) + accumulated_drag / (handle_transform_orgin - starting_mouse_position)
 		var lock_scale: bool = Input.is_action_pressed("lock scale");
 		
 		if resize_mode == PlayerHolder.ResizeMode.UP or resize_mode == PlayerHolder.ResizeMode.DOWN:
@@ -267,4 +271,55 @@ func physics_resize():
 			else:
 				change *= Utils.discrete_transform_multiplier
 		
-		$player.resize_selection(resizing_orgin, change)
+		$player.resize_selection(handle_transform_orgin, change)
+
+
+var undo_deque: Deque = Deque.new()
+var redo_stack: Array = []
+const max_undo: int = 100
+var action_finished: bool = true
+
+signal update_undo_state(enabled: bool, tooltip: String)
+signal update_redo_state(enabled: bool, tooltip: String)
+
+func update_undoredo_button_state():
+	if undo_deque.is_empty():
+		update_undo_state.emit(false, "")
+	else:
+		var top_state: Actions.CachedState = undo_deque.top()
+		update_undo_state.emit(true, top_state.get_name())
+		
+	if redo_stack.is_empty():
+		update_redo_state.emit(false, "")
+	else:
+		var top_state: Actions.CachedState = redo_stack.back()
+		update_redo_state.emit(true, top_state.get_name())
+
+func apply_action(action: Actions._Action, finished = true) -> void:
+	if !action_finished:
+		var previous_state: Actions.CachedState = undo_deque.pop_top()
+		if previous_state != null:
+			previous_state.apply(0)
+	action_finished = finished
+	var state: Actions.CachedState = Actions.CachedState.new($player)
+	state.add(action)
+	state.apply(1)
+	undo_deque.push_top(state)
+	redo_stack = []
+	while undo_deque.size > max_undo:
+		undo_deque.pop_bottom()
+	update_undoredo_button_state()
+
+func undo() -> void:
+	var state: Actions.CachedState = undo_deque.pop_top()
+	if state == null: return
+	state.apply(0)
+	redo_stack.push_back(state)
+	update_undoredo_button_state()
+
+func redo() -> void:
+	var state: Actions.CachedState = redo_stack.pop_back()
+	if state == null: return
+	state.apply(1)
+	undo_deque.push_top(state)
+	update_undoredo_button_state()

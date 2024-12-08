@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bgetyrcixd8fa"]
+
+[ext_resource type="Texture2D" uid="uid://c56ltb8fx4oe1" path="res://icons/new.tres" id="1_wrh5f"]
+[ext_resource type="Script" path="res://tool_bar/tool_bar_button.gd" id="2_pgipe"]
+
+[node name="Button" type="Button"]
+custom_minimum_size = Vector2(48, 48)
+icon = ExtResource("1_wrh5f")
+flat = true
+expand_icon = true
+script = ExtResource("2_pgipe")
+
+[connection signal="button_down" from="." to="." method="_on_button_down"]
+[connection signal="button_up" from="." to="." method="_on_button_up"]

@@ -1,10 +1,21 @@
-[gd_scene load_steps=6 format=3 uid="uid://b5kcwipvoib4"]
+[gd_scene load_steps=17 format=3 uid="uid://b5kcwipvoib4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4kpiv"]
+[ext_resource type="Texture2D" uid="uid://mtd5sqk4315y" path="res://icons/layer_top.tres" id="2_at1bm"]
+[ext_resource type="PackedScene" uid="uid://bgetyrcixd8fa" path="res://tool_bar/tool bar button.tscn" id="2_kpb44"]
 [ext_resource type="Script" path="res://player/player.gd" id="2_so40g"]
 [ext_resource type="Script" path="res://player/player_holder.gd" id="2_wroqk"]
+[ext_resource type="Texture2D" uid="uid://belif1i43ve3e" path="res://icons/layer_bottom.tres" id="3_c3puf"]
+[ext_resource type="Texture2D" uid="uid://pgt567fpm81l" path="res://icons/layer_up.tres" id="4_4y8ud"]
 [ext_resource type="Script" path="res://selection.gd" id="4_vyjmj"]
+[ext_resource type="Texture2D" uid="uid://plhyo6d2cv7e" path="res://icons/layer_down.tres" id="5_16nb6"]
 [ext_resource type="Script" path="res://selection_box.gd" id="5_pp7a0"]
+[ext_resource type="Texture2D" uid="uid://c8htowr1d8dny" path="res://icons/undo.tres" id="6_l8maj"]
+[ext_resource type="Script" path="res://tool_bar/undo.gd" id="6_rk3vy"]
+[ext_resource type="Texture2D" uid="uid://dxtibpm2v4fyi" path="res://icons/redo.tres" id="7_8ohri"]
+[ext_resource type="Texture2D" uid="uid://b6wcdkeehighk" path="res://icons/save.tres" id="8_dqovd"]
+[ext_resource type="Script" path="res://tool_bar/redo.gd" id="8_l8bw5"]
+[ext_resource type="Texture2D" uid="uid://ce0i6bjaaxnci" path="res://icons/load.tres" id="9_0s31j"]
 
 [node name="main" type="VBoxContainer"]
 anchors_preset = 15
@@ -15,9 +26,76 @@ grow_vertical = 2
 script = ExtResource("1_4kpiv")
 
 [node name="ColorRect" type="ColorRect" parent="."]
-custom_minimum_size = Vector2(0, 42.865)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 color = Color(0.371877, 0.61879, 0.572072, 1)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ColorRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Save" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Save"
+disabled = true
+icon = ExtResource("8_dqovd")
+
+[node name="Load" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Load"
+disabled = true
+icon = ExtResource("9_0s31j")
+
+[node name="Divider2" type="ColorRect" parent="ColorRect/HBoxContainer"]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(0.194167, 0.360515, 0.329612, 1)
+
+[node name="Undo" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Undo"
+disabled = true
+icon = ExtResource("6_l8maj")
+script = ExtResource("6_rk3vy")
+
+[node name="Redo" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Redo"
+disabled = true
+icon = ExtResource("7_8ohri")
+script = ExtResource("8_l8bw5")
+
+[node name="Divider" type="ColorRect" parent="ColorRect/HBoxContainer"]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(0.194167, 0.360515, 0.329612, 1)
+
+[node name="Layer Top" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Bring to Top"
+icon = ExtResource("2_at1bm")
+
+[node name="Layer Up" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Bring up"
+disabled = true
+icon = ExtResource("4_4y8ud")
+
+[node name="Layer Down" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Bring down"
+disabled = true
+icon = ExtResource("5_16nb6")
+
+[node name="Layer Bottom" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+layout_mode = 2
+tooltip_text = "Bring to bottom"
+disabled = true
+icon = ExtResource("3_c3puf")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -209,7 +287,12 @@ grow_vertical = 0
 mouse_default_cursor_shape = 10
 color = Color(1, 1, 1, 0.498039)
 
+[connection signal="pressed" from="ColorRect/HBoxContainer/Undo" to="." method="undo"]
+[connection signal="pressed" from="ColorRect/HBoxContainer/Redo" to="." method="redo"]
+[connection signal="pressed" from="ColorRect/HBoxContainer/Layer Top" to="." method="test_action"]
 [connection signal="gui_input" from="HBoxContainer/player_holder" to="HBoxContainer/player_holder" method="_on_gui_input"]
+[connection signal="update_redo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Redo" method="_on_player_holder_update_redo_state"]
+[connection signal="update_undo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Undo" method="_on_player_holder_update_undo_state"]
 [connection signal="resized" from="HBoxContainer/player_holder/player/selection_box" to="HBoxContainer/player_holder/player/selection_box" method="_on_resized"]
 [connection signal="gui_input" from="HBoxContainer/player_holder/player/selection_box/top_bar" to="HBoxContainer/player_holder" method="_on_resize_gui_input" binds= [0]]
 [connection signal="gui_input" from="HBoxContainer/player_holder/player/selection_box/left_bar" to="HBoxContainer/player_holder" method="_on_resize_gui_input" binds= [1]]
