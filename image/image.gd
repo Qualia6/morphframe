@@ -2,6 +2,7 @@ extends Node2D
 class_name PlayerImage
 
 var selection_indicator_animation:float = 0
+var image_name: StringName
 
 var selected: bool = false:
 	set(value):
@@ -29,10 +30,21 @@ func _process(delta: float) -> void:
 
 signal clicked
 
+func get_data() -> Dictionary:
+	return {
+		&"transform": transform,
+		&"image_name": image_name
+	}
 
-func set_texture(texture: ImageTexture):
-	$Image.texture = texture
-	$Image.size = texture.get_size()
+func load_from_data(data: Dictionary) -> void:
+	transform = data.transform
+	set_texture(data.image_name)
+	
+
+func set_texture(new_image_name: StringName):
+	image_name = new_image_name
+	$Image.texture = AssetManager.image_textures[image_name]
+	$Image.size = $Image.texture.get_size()
 
 
 var previous_transform: Transform2D = transform
