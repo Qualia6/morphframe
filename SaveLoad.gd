@@ -81,7 +81,7 @@ static func load_images_from_config(config: ConfigFile, reader: ZIPReader) -> St
 	AssetManager.image_ref_counts = config.get_value("util", "image_ref_counts")
 	AssetManager.image_textures = {}
 	AssetManager.image_hashes = {}
-	delete_all_temp_images()
+	AssetManager.delete_all_temp_images()
 	for image_name: StringName in AssetManager.image_ref_counts:
 		# transfer file over
 		var source_image_path: String = images_folder_in_zip + image_name
@@ -95,7 +95,7 @@ static func load_images_from_config(config: ConfigFile, reader: ZIPReader) -> St
 
 
 # returns "" on success and an error message on failure
-static func load_config(config: ConfigFile, reader: ZIPReader, player: Node) -> String:
+static func load_config(config: ConfigFile, reader: ZIPReader, player: Player) -> String:
 	var err_str: String
 	
 	err_str = load_images_from_config(config, reader)
@@ -109,7 +109,7 @@ static func load_config(config: ConfigFile, reader: ZIPReader, player: Node) -> 
 	return ""
 
 
-static func load_file_selected(path: String, player: Node) -> String:
+static func load_file_selected(path: String, player: Player) -> String:
 	var reader := ZIPReader.new()
 	var err: Error
 	var data: PackedByteArray
@@ -136,15 +136,10 @@ static func load_file_selected(path: String, player: Node) -> String:
 	
 	return ""
 
-static func delete_all_temp_images() -> void:
-	var dir = DirAccess.open(AssetManager.temp_image_files)
-	for file in dir.get_files():
-		dir.remove(file)
-
 
 static var PlayerImageScene: PackedScene = preload("res://image/PlayerImage.tscn")
 
-static func load_image_from_data(image_data: Dictionary, player: Node) -> void:
+static func load_image_from_data(image_data: Dictionary, player: Player) -> void:
 	var instance: PlayerImage = PlayerImageScene.instantiate()
 	instance.load_from_data(image_data)
 	player.attach_image(instance, image_data.image_name)

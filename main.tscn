@@ -37,12 +37,42 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_4kpiv")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="Popups" type="Node" parent="."]
+
+[node name="Save" type="FileDialog" parent="Popups"]
+auto_translate_mode = 1
+title = "Save Project"
+size = Vector2i(207, 175)
+popup_window = true
+ok_button_text = "Save"
+dialog_hide_on_ok = true
+access = 2
+filters = PackedStringArray("*.meow", "*.zip")
+use_native_dialog = true
+
+[node name="Load" type="FileDialog" parent="Popups"]
+auto_translate_mode = 1
+title = "Open a File"
+size = Vector2i(207, 175)
+popup_window = true
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.meow", "*.zip")
+use_native_dialog = true
+
+[node name="Alert" type="AcceptDialog" parent="Popups"]
+initial_position = 4
+popup_window = true
+dialog_autowrap = true
+
+[node name="OptionsBarBackground" type="ColorRect" parent="."]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 color = Color(0.371877, 0.61879, 0.572072, 1)
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ColorRect"]
+[node name="OptionsBar" type="HBoxContainer" parent="OptionsBarBackground"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -50,27 +80,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Save" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
-visible = false
+[node name="Save" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 layout_mode = 2
 tooltip_text = "Save"
-disabled = true
 icon = ExtResource("8_dqovd")
 
-[node name="Load" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
-visible = false
+[node name="Load" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 layout_mode = 2
 tooltip_text = "Load"
-disabled = true
 icon = ExtResource("9_0s31j")
 
-[node name="Divider2" type="ColorRect" parent="ColorRect/HBoxContainer"]
-visible = false
+[node name="Divider2" type="ColorRect" parent="OptionsBarBackground/OptionsBar"]
 custom_minimum_size = Vector2(4, 0)
 layout_mode = 2
 color = Color(0.194167, 0.360515, 0.329612, 1)
 
-[node name="Undo" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Undo" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 layout_mode = 2
 tooltip_text = "Undo"
 disabled = true
@@ -78,7 +103,7 @@ shortcut = SubResource("Shortcut_pv5sw")
 icon = ExtResource("6_l8maj")
 script = ExtResource("6_rk3vy")
 
-[node name="Redo" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Redo" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 layout_mode = 2
 tooltip_text = "Redo"
 disabled = true
@@ -86,34 +111,34 @@ shortcut = SubResource("Shortcut_6i5uu")
 icon = ExtResource("7_8ohri")
 script = ExtResource("8_l8bw5")
 
-[node name="Divider" type="ColorRect" parent="ColorRect/HBoxContainer"]
+[node name="Divider" type="ColorRect" parent="OptionsBarBackground/OptionsBar"]
 visible = false
 custom_minimum_size = Vector2(4, 0)
 layout_mode = 2
 color = Color(0.194167, 0.360515, 0.329612, 1)
 
-[node name="Layer Top" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Layer Top" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 visible = false
 layout_mode = 2
 tooltip_text = "Bring to Top"
 disabled = true
 icon = ExtResource("2_at1bm")
 
-[node name="Layer Up" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Layer Up" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 visible = false
 layout_mode = 2
 tooltip_text = "Bring up"
 disabled = true
 icon = ExtResource("4_4y8ud")
 
-[node name="Layer Down" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Layer Down" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 visible = false
 layout_mode = 2
 tooltip_text = "Bring down"
 disabled = true
 icon = ExtResource("5_16nb6")
 
-[node name="Layer Bottom" parent="ColorRect/HBoxContainer" instance=ExtResource("2_kpb44")]
+[node name="Layer Bottom" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 visible = false
 layout_mode = 2
 tooltip_text = "Bring to bottom"
@@ -124,24 +149,24 @@ icon = ExtResource("3_c3puf")
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+[node name="Frame" type="VBoxContainer" parent="HBoxContainer"]
 visible = false
 custom_minimum_size = Vector2(98.98, 0)
 layout_mode = 2
 
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/Frame"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 size_flags_vertical = 3
 color = Color(0.961862, 0.577685, 0.749513, 1)
 
-[node name="ColorRect2" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+[node name="ColorRect2" type="ColorRect" parent="HBoxContainer/Frame"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 size_flags_vertical = 3
 color = Color(0.945532, 0.958783, 0.750782, 1)
 
-[node name="ColorRect3" type="ColorRect" parent="HBoxContainer/VBoxContainer"]
+[node name="ColorRect3" type="ColorRect" parent="HBoxContainer/Frame"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 size_flags_vertical = 3
@@ -311,11 +336,15 @@ grow_vertical = 0
 mouse_default_cursor_shape = 10
 color = Color(1, 1, 1, 0.498039)
 
-[connection signal="pressed" from="ColorRect/HBoxContainer/Undo" to="." method="undo"]
-[connection signal="pressed" from="ColorRect/HBoxContainer/Redo" to="." method="redo"]
+[connection signal="file_selected" from="Popups/Save" to="." method="save_file_selected"]
+[connection signal="file_selected" from="Popups/Load" to="." method="load_file_selected"]
+[connection signal="pressed" from="OptionsBarBackground/OptionsBar/Save" to="." method="save_button"]
+[connection signal="pressed" from="OptionsBarBackground/OptionsBar/Load" to="." method="load_button"]
+[connection signal="pressed" from="OptionsBarBackground/OptionsBar/Undo" to="." method="undo_button"]
+[connection signal="pressed" from="OptionsBarBackground/OptionsBar/Redo" to="." method="redo_button"]
 [connection signal="gui_input" from="HBoxContainer/player_holder" to="HBoxContainer/player_holder" method="_on_gui_input"]
-[connection signal="update_redo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Redo" method="_on_player_holder_update_redo_state"]
-[connection signal="update_undo_state" from="HBoxContainer/player_holder" to="ColorRect/HBoxContainer/Undo" method="_on_player_holder_update_undo_state"]
+[connection signal="update_redo_state" from="HBoxContainer/player_holder" to="OptionsBarBackground/OptionsBar/Redo" method="_on_player_holder_update_redo_state"]
+[connection signal="update_undo_state" from="HBoxContainer/player_holder" to="OptionsBarBackground/OptionsBar/Undo" method="_on_player_holder_update_undo_state"]
 [connection signal="resized" from="HBoxContainer/player_holder/player/selection_box" to="HBoxContainer/player_holder/player/selection_box" method="_on_resized"]
 [connection signal="gui_input" from="HBoxContainer/player_holder/player/selection_box/top_bar" to="HBoxContainer/player_holder" method="_on_resize_gui_input" binds= [0]]
 [connection signal="gui_input" from="HBoxContainer/player_holder/player/selection_box/left_bar" to="HBoxContainer/player_holder" method="_on_resize_gui_input" binds= [1]]

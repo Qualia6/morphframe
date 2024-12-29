@@ -1,6 +1,13 @@
 class_name AssetManager
 
-const temp_image_files: String = "user://temp/images/"
+# uses a randomized subfolder so that multipile instances dont interfer with each other
+const temp_image_files_root: String = "user://temp/images/"
+static var temp_image_files: String = "":
+	get():
+		if temp_image_files == "":
+			temp_image_files = temp_image_files_root + str(randi()) + "/"
+			DirAccess.make_dir_recursive_absolute(temp_image_files)
+		return temp_image_files
 
 static var image_ref_counts: Dictionary = {} # StringName (image name), int (reference count)
 static var image_textures: Dictionary = {} # StringName (image name), ImageTexture
@@ -54,6 +61,7 @@ static func generate_unused_image_name(goal_name: StringName) -> StringName:
 # takes a file path
 # returns a StringName for the image
 static func import_or_reuse_image(source_file_path: String) -> StringName:
+	
 	var source: DirAccess = DirAccess.open(source_file_path.get_base_dir())
 	var image: Image = Image.new()
 	image.load(source_file_path)
@@ -88,3 +96,14 @@ static func load_image_from_temp_folder(image_name: StringName) -> void:
 		@warning_ignore("shadowed_global_identifier")
 		var hash: PackedByteArray = hash_image(image)
 		image_hashes[image_name] = hash
+
+
+static func delete_all_temp_images() -> void:
+	var dir = DirAccess.open(temp_image_files)
+	for file in dir.get_files():
+		dir.remove(file)
+
+static func delete_temp_image_folder() -> void:
+	delete_all_temp_images()
+	DirAccess.remove_absolute(temp_image_files)
+	temp_image_files = "" # so that when accessing temp_image_files next time anouther directory will be created

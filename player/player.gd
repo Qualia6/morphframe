@@ -13,23 +13,35 @@ var selection: Array[PlayerImage] = []
 func place_image_files(files: PackedStringArray) -> void:
 	const drop_offset_distance = 40
 	for i: int in range(0, len(files)):
-		var image: Image = Image.new()
-		image.load(files[i])
-		var image_texture: ImageTexture = ImageTexture.new()
-		image_texture.set_image(image)
+		var source_file_path: String = files[i]
+		var image_name: StringName = AssetManager.import_or_reuse_image(source_file_path)
 		var place_location = get_local_mouse_position() + Vector2(i,i) * drop_offset_distance
-		add_image(place_location, image_texture)
+		add_image(place_location, image_name)
 
 
-func add_image(location: Vector2, image: ImageTexture) -> void:
+func add_image(location: Vector2, image_name: StringName) -> void:
+	var image: ImageTexture = AssetManager.use_image(image_name)
 	var instance: PlayerImage = PlayerImageScene.instantiate()
 	instance.position = location
-	instance.set_texture(image)
+	instance.set_texture(image_name)
 	var scale_factor: float = min(300 / image.get_size().y, min(300 / image.get_size().x, 1))
 	instance.scale = Vector2(scale_factor,scale_factor)
-	instance.clicked.connect(get_parent()._on_object_clicked.bind(instance))
-	$children.add_child(instance)
+	attach_image(instance, image_name)
 	print("added image :3")
+
+func attach_image(image: PlayerImage, image_name: StringName) -> void:
+	image.clicked.connect(get_parent()._on_object_clicked.bind(image))
+	$children.add_child(image)
+
+
+func reset() -> void:
+	deselect_everything()
+	for child: PlayerImage in $children.get_children():
+		delete_image(child)
+
+func delete_image(instance: PlayerImage):
+	AssetManager.release_image(instance.image_name)
+	instance.queue_free()
 
 
 enum SelectionMode {NORMAL, ADD, REMOVE, XOR}
