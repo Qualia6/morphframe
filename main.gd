@@ -40,6 +40,7 @@ func load_button():
 	load_dialog.show()
 
 func load_file_selected(path: String) -> void:
+	player_holder.reset()
 	player.reset()
 	var err_str: String = SaveLoad.load_file_selected(path, player)
 	if err_str != "":

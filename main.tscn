@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://b5kcwipvoib4"]
+[gd_scene load_steps=24 format=3 uid="uid://b5kcwipvoib4"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_4kpiv"]
 [ext_resource type="Texture2D" uid="uid://mtd5sqk4315y" path="res://icons/layer_top.tres" id="2_at1bm"]
@@ -16,6 +16,13 @@
 [ext_resource type="Texture2D" uid="uid://b6wcdkeehighk" path="res://icons/save.tres" id="8_dqovd"]
 [ext_resource type="Script" path="res://tool_bar/redo.gd" id="8_l8bw5"]
 [ext_resource type="Texture2D" uid="uid://ce0i6bjaaxnci" path="res://icons/load.tres" id="9_0s31j"]
+[ext_resource type="Texture2D" uid="uid://sbcmrj6fvqfq" path="res://icons/trash.tres" id="13_qer3t"]
+
+[sub_resource type="InputEventAction" id="InputEventAction_teshd"]
+action = &"Save"
+
+[sub_resource type="Shortcut" id="Shortcut_kd8y5"]
+events = [SubResource("InputEventAction_teshd")]
 
 [sub_resource type="InputEventAction" id="InputEventAction_ps3ni"]
 action = &"Undo"
@@ -83,6 +90,7 @@ grow_vertical = 2
 [node name="Save" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
 layout_mode = 2
 tooltip_text = "Save"
+shortcut = SubResource("Shortcut_kd8y5")
 icon = ExtResource("8_dqovd")
 
 [node name="Load" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
@@ -144,6 +152,19 @@ layout_mode = 2
 tooltip_text = "Bring to bottom"
 disabled = true
 icon = ExtResource("3_c3puf")
+
+[node name="Divider3" type="ColorRect" parent="OptionsBarBackground/OptionsBar"]
+visible = false
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+color = Color(0.194167, 0.360515, 0.329612, 1)
+
+[node name="Delete" parent="OptionsBarBackground/OptionsBar" instance=ExtResource("2_kpb44")]
+visible = false
+layout_mode = 2
+tooltip_text = "Bring to bottom"
+disabled = true
+icon = ExtResource("13_qer3t")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2

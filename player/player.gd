@@ -36,6 +36,7 @@ func attach_image(image: PlayerImage, image_name: StringName) -> void:
 
 func reset() -> void:
 	deselect_everything()
+	update_selection_box()
 	for child: PlayerImage in $children.get_children():
 		delete_image(child)
 

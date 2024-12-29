@@ -26,7 +26,6 @@ var resize_mode = ResizeMode.DOWN_RIGHT
 
 var handle_transform_orgin: Vector2
 
-
 func _on_object_clicked(object: PlayerImage) -> void:
 	if mouse_action == MouseAction.NONE:
 		var previous_selection: Array[PlayerImage] = $player.selection.duplicate()
@@ -273,6 +272,10 @@ func physics_resize(final: bool):
 	apply_action(action, final)
 	$player.update_selection_box()
 
+func reset() -> void:
+	undo_deque.clear()
+	redo_stack.clear()
+	update_undoredo_button_state()
 
 var undo_deque: Deque = Deque.new()
 var redo_stack: Array = []
@@ -314,7 +317,7 @@ func apply_action(action: Actions._Action, finished = true) -> void:
 	state.apply(1)
 	undo_deque.push_top(state)
 	
-	redo_stack = []
+	redo_stack.clear()
 	
 	while undo_deque.size > Utils.max_undo:
 		undo_deque.pop_bottom()
