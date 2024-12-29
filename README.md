@@ -10,7 +10,7 @@
 - Fine grain rotation unintuitive
 - Skew is calcuated wrong
 - `player_holder.gd` needs to be cleaned up
-- savefiles need git compadable option (aka not zipped up + `.gitnore`)
+- savefiles need git compadable option (aka not zipped up + `.gitignore`)
 
 ## Implemented:
 - Navigation
